@@ -1,0 +1,11 @@
+# 配置文件
+name =		 123#文件名
+version=1.2.3 # 版本号
+
+#wrong data are below, ignored by file parser process
+type=
+=12333
+info
+	version=1.2.3
+
+
