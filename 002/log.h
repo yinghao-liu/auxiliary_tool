@@ -18,6 +18,7 @@
 #ifndef _LOG_H_
 #define _LOG_H_
 #include <stdio.h>
+#include <stdint.h>
 
 /*
  * the second argument must be the const string like "aabbcc%s", can't be a char* pointer
@@ -26,7 +27,7 @@
 #define log(level, s, ...)  \
 	    __log(level, "%s:%u(%s): "s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-enum debug_level{
+enum level_t{
 	FATAL = 0,
 	ERROR,
 	WARN,
@@ -34,8 +35,8 @@ enum debug_level{
 	DEBUG
 };
 
-int log_init(int log_level=FATAL, const char *log_file=NULL, int max_mb=10);
+int log_init(level_t log_level=FATAL, const char *log_file=NULL, uint16_t max_mb=10);
 
 /*don't use this function directly, use macro log instead*/
-void __log(int level, const char *s, ...);
+void __log(level_t level, const char *s, ...);
 #endif

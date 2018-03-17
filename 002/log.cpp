@@ -29,14 +29,14 @@
 using std::string;
 
 string g_log_file;
-int g_log_level=FATAL;
+level_t g_log_level=FATAL;
 FILE *g_log_fd=NULL;
 int g_max_mb=10;
 const char *g_map[]={"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
-//int log_init(int log_level=FATAL, const char *log_file=NULL, int max_mb=10)
-int log_init(int log_level, const char *log_file, int max_mb)
+//int log_init(level_t log_level=FATAL, const char *log_file=NULL, uint16_t max_mb=10);
+int log_init(level_t log_level, const char *log_file, uint16_t max_mb)
 {
 	if (NULL != log_file){
 		if (0 != g_log_file.size() && NULL != g_log_fd){
@@ -50,7 +50,7 @@ int log_init(int log_level, const char *log_file, int max_mb)
 			return -1;
 		}
 	}
-	g_log_level = log_level;
+	g_log_level = log_level;// there is no need to check it
 	g_max_mb = max_mb;
 	return 0;
 }
@@ -68,6 +68,7 @@ int check_file_size(void)
 	}
 
 	fclose(g_log_fd);//The fclose() function flushes the stream pointed to by g_log_fd
+	g_log_fd = NULL;
 	if (-1 == stat(g_log_file.c_str(), &file_stat)){
 		perror("stat");
 		return -1;
@@ -77,7 +78,6 @@ int check_file_size(void)
 	size_t len;
 	half_point = file_stat.st_size/2;
 	len = file_stat.st_size - half_point;
-	g_log_fd = NULL;
 	int fd_log;
 	int fd_tmp;
 	char tmp_file[]="tmpXXXXXX";
@@ -119,9 +119,9 @@ ending:
 	return ret;
 }
 
-void __log(int level, const char *s, ...)
+void __log(level_t level, const char *s, ...)
 {
-	if ((level>g_log_level) || (level>FATAL)){
+	if ((level>g_log_level)){
 		return;
 	}
 	time_t now_t;
