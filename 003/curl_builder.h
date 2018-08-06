@@ -1,29 +1,41 @@
+/*
+ * Copyright (C) 2018 francis_hao <francis_hao@126.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or 
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #ifndef _CURL_BUILDER_
 #define _CURL_BUILDER_
-#include <mqueue.h>
-#include <iostream>
+##include <mqueue.h>
+##include <iostream>
 #include <string>
 #include <vector>
 #include <curl/curl.h>
-using std::vector;
-using std::string;
 
 class curl_t{
 public:
 	~curl_t();
-	int init(string mac_w, string longitude, string latitude);	
+	int init(void);	
 	int url_get(const char *url);
-	int url_post(const char *url, vector<string> &head, string &data);
+	int url_post(const char *url, std::vector<string> &head, std::string &data);
+
 protected:
 	static size_t receive_data(char *ptr, size_t size, size_t nmemb, void *userdata);
 
 private:
 	CURL *curl_handle = NULL;
 	string buff;
-	const static string content_type;
-	const static string basic_url;
-
-	
 };
 
 #endif

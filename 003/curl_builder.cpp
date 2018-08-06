@@ -1,27 +1,31 @@
+/*
+ * Copyright (C) 2018 francis_hao <francis_hao@126.com>
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or 
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
 #include <iostream>
 #include <errno.h>
-
-#include "log.h"
 #include "curl_builder.h"
-#include "json/json.h"
-#include "sha256/picosha2.h"
-#include "encryption/md5.h"
-using namespace std;
-using namespace Json;
-#define MACW_FILENAME	"macw-file.dat"
 
-const string curl_t::content_type = "Content-Type: application/json";
-const string curl_t::basic_url = "https://wifimacapi.getui.com/v1/";
-//const string curl_t::basic_url = "http://www.asciima.com/v1/";
-const string curl_t::account = "yuren2018";
-const string curl_t::passwd  = "getui1234";
+using namespace std;
 
 curl_t::~curl_t()
 {
