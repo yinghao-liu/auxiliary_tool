@@ -24,3 +24,26 @@ reset all options of a libcurl session handle
 `CURLcode curl_easy_perform(CURL *easy_handle);`
 perform a blocking file transfer
 
+## 辅助函数说明
+`curl_version_info_data *curl_version_info( CURLversion age);`  
+gets detailed libcurl (and other used libraries) version info
+
+`CURLcode curl_easy_getinfo(CURL *curl, CURLINFO info, ... );`  
+get information about a performed transfer, such as CURLINFO_EFFECTIVE_URL(Last used URL), CURLINFO_RESPONSE_CODE(Last received response code),
+CURLINFO_TOTAL_TIME(Total time of previous transfer), CURLINFO_NAMELOOKUP_TIME(Time from start until name resolving completed), CURLINFO_CONNECT_TIME
+(Time from start until remote host or proxy completed)...
+
+`CURLFORMcode curl_formadd(struct curl_httppost ** firstitem, struct curl_httppost ** lastitem, ...);`  
+add a section to a multipart/formdata HTTP POST. about this form, refer to *libcurl_curl_formadd.pcap*
+
+`void curl_formfree(struct curl_httppost *form);`
+free a previously build multipart/formdata HTTP POST chain, that is used to clean up data previously built/appended with curl_formadd(3). This must be called when the data has been used, which typically means after curl_easy_perform(3) has been called.
+
+`struct curl_slist *curl_slist_append(struct curl_slist *list, const char * string);`  
+add a string to an slist.
+
+`void curl_slist_free_all(struct curl_slist *list);`  
+free an entire curl_slist list.
+
+
+
