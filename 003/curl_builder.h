@@ -17,8 +17,8 @@
  */
 #ifndef _CURL_BUILDER_
 #define _CURL_BUILDER_
-##include <mqueue.h>
-##include <iostream>
+//#include <mqueue.h>
+//#include <iostream>
 #include <string>
 #include <vector>
 #include <curl/curl.h>
@@ -28,14 +28,16 @@ public:
 	~curl_t();
 	int init(void);	
 	int url_get(const char *url);
-	int url_post(const char *url, std::vector<string> &head, std::string &data);
+	int url_post(const char *url, const std::vector<std::string> &head={}, const std::string &data="");
 
 protected:
 	static size_t receive_data(char *ptr, size_t size, size_t nmemb, void *userdata);
+	static int debug_info(CURL *handle, curl_infotype type, char *data, size_t size, void *userp);
+	static void dump(const char *text, FILE *stream, unsigned char *ptr, size_t size);
 
 private:
 	CURL *curl_handle = NULL;
-	string buff;
+	std::string buff;
 };
 
 #endif
