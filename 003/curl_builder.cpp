@@ -32,6 +32,7 @@ curl_t::~curl_t()
 	if (NULL != curl_handle){
 		curl_easy_cleanup(curl_handle);
 	}
+	curl_global_cleanup();
 }
 
 int curl_t::init()
@@ -53,8 +54,6 @@ int curl_t::init()
 
 int curl_t::url_post(const char *url, const vector<string> &head, const string &data)
 {
-	CURLcode code;
-
 	curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	buff.clear();
@@ -66,34 +65,34 @@ int curl_t::url_post(const char *url, const vector<string> &head, const string &
 	}
 
 	/*post data*/
-	struct curl_httppost* post = NULL;
-	struct curl_httppost* last = NULL;
+	curl_mime *mime=nullptr;
+	curl_mimepart *part=nullptr;
 	if (0 == data.size()){
-		//curl_formadd(&post, &last, CURLFORM_COPYNAME, "file",\
-				CURLFORM_FILE, MACW_FILENAME, CURLFORM_END);
-		curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",\
-				CURLFORM_COPYCONTENTS, "francis", CURLFORM_END);
-		curl_formadd(&post, &last, CURLFORM_COPYNAME, "age",\
-				CURLFORM_COPYCONTENTS, "18", CURLFORM_END);
-		curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, post);
+		mime = curl_mime_init(curl_handle);
+		part = curl_mime_addpart(mime);
+		curl_mime_data(part, "This is the field data", CURL_ZERO_TERMINATED);
+		curl_mime_name(part, "data");
+		part = curl_mime_addpart(mime);
+		curl_mime_data(part, "francis", CURL_ZERO_TERMINATED);
+		curl_mime_name(part, "name");
+		curl_easy_setopt(curl_handle, CURLOPT_MIMEPOST, mime);
 	}else{
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, (void*)data.c_str());
 	}
 
 	/*perform*/
+	CURLcode code;
 	code = curl_easy_perform(curl_handle);
 	if (0 != code){
 		printf("curl_easy_perform error\n");
 	}
-	curl_formfree(post);
 	curl_slist_free_all(slist);
+	curl_mime_free(mime);//mime is NULL is OK  
 	return (0==code)?0:-1;
 }
 
 int curl_t::url_get(const char *url)
 {
-	CURLcode code;
-
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPGET, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	buff.clear();
@@ -101,7 +100,9 @@ int curl_t::url_get(const char *url)
 	struct curl_slist *slist=NULL;
 	slist = curl_slist_append(slist, "name:francis");
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, slist);
+
 	/*perform*/
+	CURLcode code;
 	code = curl_easy_perform(curl_handle);
 	if (0 != code){
 		printf("curl_easy_perform error\n");
@@ -109,7 +110,7 @@ int curl_t::url_get(const char *url)
 	curl_slist_free_all(slist);
 	//cout<<buff<<endl;
 	cout<<"buff len is "<<buff.size()<<endl;
-	return 0;
+	return (0==code)?0:-1;
 }
 
 size_t curl_t::receive_data(char *ptr, size_t size, size_t nmemb, void *userdata)
