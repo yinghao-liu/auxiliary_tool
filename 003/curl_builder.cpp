@@ -44,8 +44,9 @@ int curl_t::init()
 		return -1;
 	}
 	//curl_easy_setopt(curl_handle, CURLOPT_DEBUGFUNCTION, debug_info);
-	curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+	//curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
 	//curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, 10);
+	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, &err_msg);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&buff);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, receive_data);
 }
@@ -58,6 +59,9 @@ int curl_t::url_post(const char *url, const vector<string> &head, const string &
 	curl_easy_setopt(curl_handle, CURLOPT_POST, 1);
 	curl_easy_setopt(curl_handle, CURLOPT_URL, url);
 	buff.clear();
+	if (NULL == curl_handle){
+		cout<<"error------"<<endl;
+	}
 	/*add head information*/
 	struct curl_slist *slist=NULL;
 	for (int i=0; i<head.size(); i++){
@@ -71,10 +75,14 @@ int curl_t::url_post(const char *url, const vector<string> &head, const string &
 	if (0 == data.size()){
 		//curl_formadd(&post, &last, CURLFORM_COPYNAME, "file",\
 				CURLFORM_FILE, MACW_FILENAME, CURLFORM_END);
-		curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",\
-				CURLFORM_COPYCONTENTS, "francis", CURLFORM_END);
-		curl_formadd(&post, &last, CURLFORM_COPYNAME, "age",\
-				CURLFORM_COPYCONTENTS, "18", CURLFORM_END);
+		curl_formadd(&post, &last, CURLFORM_COPYNAME, "key",\
+			CURLFORM_COPYCONTENTS, "abc/rabbit.jpg", CURLFORM_END);
+		curl_formadd(&post, &last, CURLFORM_COPYNAME, "token",\
+				CURLFORM_COPYCONTENTS, "gBjEyMjg4MX0=", CURLFORM_END);
+		curl_formadd(&post, &last, CURLFORM_COPYNAME, "file",\
+				CURLFORM_FILE, "rabbit.jpg",\
+				CURLFORM_CONTENTTYPE, "application/octet-stream",\
+				CURLFORM_END);
 		curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, post);
 	}else{
 		curl_easy_setopt(curl_handle, CURLOPT_POSTFIELDS, (void*)data.c_str());
@@ -85,8 +93,11 @@ int curl_t::url_post(const char *url, const vector<string> &head, const string &
 	if (0 != code){
 		printf("curl_easy_perform error\n");
 	}
+	cout<<buff.size()<<endl;
 	curl_formfree(post);
 	curl_slist_free_all(slist);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPPOST, NULL);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, NULL);
 	return (0==code)?0:-1;
 }
 
@@ -105,8 +116,10 @@ int curl_t::url_get(const char *url)
 	code = curl_easy_perform(curl_handle);
 	if (0 != code){
 		printf("curl_easy_perform error\n");
+		printf("%s\n", err_msg);
 	}
 	curl_slist_free_all(slist);
+	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, NULL);
 	//cout<<buff<<endl;
 	cout<<"buff len is "<<buff.size()<<endl;
 	return 0;
@@ -116,7 +129,7 @@ size_t curl_t::receive_data(char *ptr, size_t size, size_t nmemb, void *userdata
 {
 	string *data = (string *)userdata;
 	data->append(ptr, size*nmemb);
-	return data->size();
+	return size*nmemb;
 }
 
 void curl_t::dump(const char *text, FILE *stream, unsigned char *ptr, size_t size)

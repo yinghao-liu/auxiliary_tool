@@ -36,8 +36,9 @@ protected:
 	static void dump(const char *text, FILE *stream, unsigned char *ptr, size_t size);
 
 private:
-	CURL *curl_handle = NULL;
 	std::string buff;
+	CURL *curl_handle = NULL;
+	char err_msg[CURL_ERROR_SIZE]={0};
 };
 
 #endif
