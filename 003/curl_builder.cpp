@@ -92,7 +92,7 @@ int curl_t::url_post(const char *url, const vector<string> &head, const string &
 	}
 	curl_slist_free_all(slist);
 	curl_mime_free(mime);//mime is NULL is OK  
-	cout<<"buff len is "<<buff.size()<<endl;
+	cout<<"post buff len is "<<buff.size()<<endl;
 	return (0==code)?0:-1;
 }
 
@@ -116,7 +116,7 @@ int curl_t::url_get(const char *url)
 	curl_slist_free_all(slist);
 	curl_easy_setopt(curl_handle, CURLOPT_HTTPHEADER, NULL);
 	//cout<<buff<<endl;
-	cout<<"buff len is "<<buff.size()<<endl;
+	cout<<"get buff len is "<<buff.size()<<endl;
 	return (0==code)?0:-1;
 }
 
