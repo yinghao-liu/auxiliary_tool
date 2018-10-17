@@ -50,6 +50,7 @@ int curl_t::init()
 	curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, &err_msg);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEDATA, (void *)&buff);
 	curl_easy_setopt(curl_handle, CURLOPT_WRITEFUNCTION, receive_data);
+	return 0;
 }
 
 
