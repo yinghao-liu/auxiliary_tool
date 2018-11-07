@@ -73,8 +73,8 @@ int rmrf(const string &path)
 	} else if ( S_ISDIR(dir_stat.st_mode) ) {   // 目录文件，递归删除目录中内容
 		dirp = opendir(path_c.c_str());
 		while ( (dp=readdir(dirp)) != NULL ) {
-			// 忽略 . 和 ..
-			if ( (0 == strcmp(".", dp->d_name)) || (0 == strcmp("..", dp->d_name)) ) {
+			// 忽略 .xx 隐藏文件
+			if (0 == strncmp(".", dp->d_name, 1)){
 				continue;
 			}
 			path_name = "";
