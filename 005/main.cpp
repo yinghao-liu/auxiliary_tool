@@ -49,7 +49,7 @@ int main(void)
 	cout<<"------"<<path<<"------"<<endl;
 	cout<<dirname(path)<<endl;
 	cout<<basename(path)<<endl;
-	path="/usr/*";
+	path="usr/*";
 	cout<<"------"<<path<<"------"<<endl;
 	cout<<dirname(path)<<endl;
 	cout<<basename(path)<<endl;
