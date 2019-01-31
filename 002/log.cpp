@@ -28,15 +28,15 @@
 #include "log.h"
 using std::string;
 
-string g_log_file;
-level_t g_log_level=FATAL;
-FILE *g_log_fd=NULL;
-int g_max_mb=10;
-const char *g_map[]={"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+static string g_log_file;
+static log_level_t g_log_level=log_level_t::FATAL;
+static FILE *g_log_fd=NULL;
+static int g_max_mb=10;
+static const char *g_map[]={"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};
+static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //int log_init(level_t log_level=FATAL, const char *log_file=NULL, uint16_t max_mb=10);
-int log_init(level_t log_level, const char *log_file, uint16_t max_mb)
+int log_init(log_level_t log_level, const char *log_file, uint16_t max_mb)
 {
 	if (NULL != log_file){
 		if (0 != g_log_file.size() && NULL != g_log_fd){
@@ -78,8 +78,8 @@ int check_file_size(void)
 	size_t len;
 	half_point = file_stat.st_size/2;
 	len = file_stat.st_size - half_point;
-	int fd_log;
-	int fd_tmp;
+	int fd_log = -1 ;
+	int fd_tmp = -1;
 	char tmp_file[]="tmpXXXXXX";
 	int ret = -1;
 	fd_log = open(g_log_file.c_str(), O_RDWR);
@@ -119,7 +119,7 @@ ending:
 	return ret;
 }
 
-void __log(level_t level, const char *s, ...)
+void __log(log_level_t level, const char *s, ...)
 {
 	if ((level>g_log_level)){
 		return;
@@ -130,7 +130,7 @@ void __log(level_t level, const char *s, ...)
 	now_t = time(NULL);
 	localtime_r(&now_t, &now_m);
 	strftime(str, sizeof (str)-1, "%m-%d %H:%M:%S ", &now_m);
-	sprintf(str+strlen(str), "[%s] ", g_map[level]);
+	sprintf(str+strlen(str), "[%s] ", g_map[(uint8_t)level]);
 
 	va_list ap; 
 	va_start(ap, s);

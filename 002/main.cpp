@@ -23,20 +23,20 @@
 void *thread1(void *nul)
 {
 	for (int i=0; i<1000; i++){
-		log(ERROR, "--------------------%d\n", i);
+		log(log_level_t::ERROR, "--------------------%d\n", i);
 		usleep(2);
 	}
 }
 void *thread2(void *nul)
 {
 	for (int i=0; i<1000; i++){
-		log(ERROR, "++++++++++++++++++++%d\n", i);
+		log(log_level_t::ERROR, "++++++++++++++++++++%d\n", i);
 		usleep(2);
 	}
 }
 int main(void)
 {
-	log_init(INFO, "main.log", 2);
+	log_init(log_level_t::INFO, "main.log", 2);
 	pthread_t p1;
 	pthread_t p2;
 	pthread_create(&p1, NULL, thread1, NULL);
