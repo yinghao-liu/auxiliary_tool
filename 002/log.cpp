@@ -29,7 +29,7 @@
 using std::string;
 
 static string g_log_file;
-static log_level_t g_log_level=log_level_t::FATAL;
+static log_level_t g_log_level=DEFAULT_LOG_LEVEL;
 static FILE *g_log_fd=NULL;
 static int g_max_mb=10;
 static const char *g_map[]={"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};

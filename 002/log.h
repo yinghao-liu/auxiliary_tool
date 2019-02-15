@@ -35,7 +35,9 @@ enum class log_level_t:uint8_t{
 	DEBUG
 };
 
-int log_init(log_level_t log_level=log_level_t::FATAL, const char *log_file=NULL, uint16_t max_mb=10);
+constexpr log_level_t DEFAULT_LOG_LEVEL = log_level_t::FATAL;
+
+int log_init(log_level_t log_level=DEFAULT_LOG_LEVEL, const char *log_file=NULL, uint16_t max_mb=10);
 
 /*don't use this function directly, use macro log instead*/
 void __log(log_level_t level, const char *s, ...);
