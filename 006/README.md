@@ -16,6 +16,6 @@ generally, you can follow the step as listed below( from [INSTALL]):
 3. [libavutil-other](https://ffmpeg.org/doxygen/trunk/group__lavu__picture.html)
 4. [FAQ](https://ffmpeg.org/faq.html)
 
-[FFmpeg]:(https://github.com/FFmpeg/FFmpeg)
-[download page]:(https://ffmpeg.org/download.html#get-sources)
-[INSTALL]:(https://github.com/FFmpeg/FFmpeg/blob/master/INSTALL.md)
+[FFmpeg]:https://github.com/FFmpeg/FFmpeg
+[download page]:https://ffmpeg.org/download.html#get-sources
+[INSTALL]:https://github.com/FFmpeg/FFmpeg/blob/master/INSTALL.md
