@@ -53,7 +53,7 @@ int pic_open_path(const char *path)
 	printf("w:%d, h:%d, pix_fmt:%d, %s\n", stream->codecpar->width, \
 			stream->codecpar->height, stream->codecpar->format,\
 			av_get_pix_fmt_name(stream->codecpar->format));
-	printf("mux is %s, codec name is %s\n", ifmt_ctx->iformat->name, avcodec_get_name(stream->codecpar->codec_id));
+	printf("demux is %s, codec name is %s\n", ifmt_ctx->iformat->name, avcodec_get_name(stream->codecpar->codec_id));
 	/*************************read_frame*****************************/
 	AVFrame *frame = NULL;
 	AVPacket packet = { .data = NULL, .size = 0 };
@@ -130,6 +130,8 @@ int pic_open_path(const char *path)
 	/**********sws_ctx is not used below, so we can clean it ***************/
 	sws_freeContext(sws_ctx);
 
+	size = av_image_get_buffer_size(dst_format, frame->width, frame->height, 1);
+	printf("dst size is %d\n", size);
 	uint8_t *buffer = (uint8_t *)malloc(size);
 	if (NULL == buffer){
 		printf("malloc error\n");
