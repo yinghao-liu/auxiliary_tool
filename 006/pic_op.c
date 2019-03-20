@@ -1,14 +1,14 @@
 /*
  * Copyright (C) 2019 francis_hao <francis_hao@126.com>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or 
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful, but 
+ * This program is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  See the 
+ * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -16,93 +16,161 @@
  *
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <libavformat/avformat.h>
 #include <libavcodec/avcodec.h>
+#include <libavutil/avutil.h>
 #include <libavutil/imgutils.h>
-#include <libavutil/pixdesc.h>
-#include <libavutil/opt.h>
+#include <libswscale/swscale.h>
 
-int pic_open(const char *path)
+int pic_open_path(const char *path)
 {
 	int ret = 0;
+	/******************avformat**************************/
 	AVFormatContext *ifmt_ctx = NULL;
-	//AV_PIX_FMT_NV12;
 	ret = avformat_open_input(&ifmt_ctx, path, NULL, NULL);
 	if (ret < 0){
 		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		return -1;
+		return ret;
 	}
 	ret = avformat_find_stream_info(ifmt_ctx, NULL);
 	if (ret < 0){
-		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		return -1;
+		printf("avformat_find_stream_info error: %s\n", av_err2str(ret));
+		goto ending1;
 	}
-	printf("w:%d, h:%d, pix_fmt:%d\n", ifmt_ctx->streams[0]->codecpar->width, ifmt_ctx->streams[0]->codecpar->height, ifmt_ctx->streams[0]->codecpar->format);
-	if (ret < 0){
-		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		return -1;
+	if (ifmt_ctx->nb_streams <= 0){
+		printf("there is no available stream:%d\n", ifmt_ctx->nb_streams);
+		ret = -1;
+		goto ending1;
 	}
-
 	AVStream *stream = ifmt_ctx->streams[0];
 	if ( AV_PIX_FMT_NONE == stream->codecpar->format)
 	{
-		printf("error pix_format: %d\n", stream->codecpar->format);
-		return -1;
+		printf("cannot recognized format: %d\n", stream->codecpar->format);
+		ret = -1;
+		goto ending1;
 	}
+	printf("w:%d, h:%d, pix_fmt:%d, %s\n", stream->codecpar->width, \
+			stream->codecpar->height, stream->codecpar->format,\
+			av_get_pix_fmt_name(stream->codecpar->format));
+	printf("mux is %s, codec name is %s\n", ifmt_ctx->iformat->name, avcodec_get_name(stream->codecpar->codec_id));
 	/*************************read_frame*****************************/
 	AVFrame *frame = NULL;
 	AVPacket packet = { .data = NULL, .size = 0 };
 	ret = av_read_frame(ifmt_ctx, &packet);
 	if (ret < 0){
 		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		return -1;
+		goto ending2;
 	}
+	//av_packet_unref(&packet)
 	frame = av_frame_alloc();
 	if (NULL == frame){
 		printf("av_frame_alloc error\n");
-		return -1;
+		ret = -1;
+		goto ending2;
 	}
+	//  av_frame_free(frame);
 	/**************************decode**********************************/
 	AVCodec *dec = NULL;
 	AVCodecContext *codec_ctx = NULL;
 	dec = avcodec_find_decoder(stream->codecpar->codec_id);
 	if (NULL == dec){
 		printf("can not find decoder for stream %d\n", 0);
-		return -1;
+		ret = -1;
+		goto ending3;
 	}
 	codec_ctx = avcodec_alloc_context3(dec);
 	if (NULL == codec_ctx){
 		printf("avcodec_alloc_context3 error\n");
-		return -1;
+		ret = -1;
+		goto ending3;
 	}
+	// avcodec_free_context(&codec_ctx)
 	ret = avcodec_open2(codec_ctx, NULL, NULL);
 	if (ret < 0){
 		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		return -1;
+		goto ending3;
 	}
 	ret = avcodec_send_packet(codec_ctx, &packet);
 	if (ret < 0){
 		printf("avcodec_send_packet error: %s\n", av_err2str(ret));
-		return -1;
+		goto ending3;
 	}
+
 	ret = avcodec_receive_frame(codec_ctx, frame);
 	if (ret < 0){
 		printf("avcodec_send_packet error: %s\n", av_err2str(ret));
-		return -1;
+		goto ending3;
 	}
 	int size = 0;
 	size = av_image_get_buffer_size(frame->format, frame->width, frame->height, 1);
 	printf("size is %d\n", size);
+
+	/*********************************sws_scale**********************************/
+	struct SwsContext *sws_ctx = NULL;
+	uint8_t *sws_dst_data[4];
+	int sws_dst_linesize[4];
+	enum AVPixelFormat dst_format = AV_PIX_FMT_NV12;
+	ret = av_image_alloc(sws_dst_data, sws_dst_linesize,
+			frame->width, frame->height, dst_format, 1);
+	if (ret < 0){
+		printf("av_image_alloc error: %s\n", av_err2str(ret));
+		sws_dst_data[0] = NULL;
+		goto ending4;
+	}
+	//av_freep(&pointers[0]);
+	sws_ctx = sws_getContext(frame->width, frame->height, frame->format,\
+			frame->width, frame->height, dst_format,\
+			SWS_BILINEAR, NULL, NULL, NULL);
+	if (NULL == sws_ctx){
+		printf("av_image_alloc error: %s\n", av_err2str(ret));
+		goto ending4;
+	}
+	ret = sws_scale(sws_ctx, (const uint8_t * const*)frame->data, frame->linesize, 0, frame->height, sws_dst_data, sws_dst_linesize);
+	/**********sws_ctx is not used below, so we can clean it ***************/
+	sws_freeContext(sws_ctx);
+
+	uint8_t *buffer = (uint8_t *)malloc(size);
+	if (NULL == buffer){
+		printf("malloc error\n");
+		goto ending5;
+	}
+	ret = av_image_copy_to_buffer(buffer, size, (const uint8_t * const*)sws_dst_data, sws_dst_linesize, dst_format, frame->width,\
+			frame->height, 1);
+	if (ret < 0){
+		printf("av_image_alloc error: %s\n", av_err2str(ret));
+		goto ending5;
+	}
+	/******************write to file************************/
 	FILE *output_file = NULL;
 	output_file = fopen("aa.yuv", "w+");
 	if (NULL == output_file){
 		perror("fopen");
 		return -1;
 	}
-	if ((ret = fwrite(frame->data[0], 1, size, output_file)) < 0) {
+	if ((ret = fwrite(buffer, 1, size, output_file)) < 0) {
 		fprintf(stderr, "Failed to dump raw data.\n");
 	}
 	fclose(output_file);
-
-	return 0;
+	output_file = NULL;
+	/*******************end**************************/
+ending5:
+	free(buffer);
+ending4:
+	if (NULL == sws_dst_data[0]){
+		av_freep(&sws_dst_data[0]);
+	}
+ending3:
+	if (NULL != codec_ctx){
+		avcodec_free_context(&codec_ctx);
+	}
+ending2:
+	if (NULL != frame){
+		av_frame_free(&frame);
+	}
+ending1:
+	if (NULL != ifmt_ctx){
+		avformat_close_input(&ifmt_ctx);
+	}
+	return ret;
 }

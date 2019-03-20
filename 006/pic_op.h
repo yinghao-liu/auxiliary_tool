@@ -18,6 +18,10 @@
 #ifndef PARSE_PATHNAME
 #define PARSE_PATHNAME
 
-int pic_open(const char *path);
+/**
+ *	open a image file
+ *	@return 0 on success, a negative AVERROR on failure.
+ */
+int pic_open_path(const char *path);
 
 #endif
