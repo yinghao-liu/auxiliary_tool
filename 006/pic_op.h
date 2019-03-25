@@ -17,11 +17,17 @@
  */
 #ifndef PARSE_PATHNAME
 #define PARSE_PATHNAME
-
+#include <stdint.h>
+#include <stdio.h>
 /**
  *	open a image file
  *	@return 0 on success, a negative AVERROR on failure.
  */
 int pic_open_path(const char *path);
+/**
+ *	open a image file
+ *	@return 0 on success, a negative AVERROR on failure.
+ */
+int pic_open_data(const uint8_t *data, size_t data_size);
 
 #endif

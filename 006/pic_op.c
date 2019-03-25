@@ -228,3 +228,141 @@ ending1:
 	return ret;
 }
 
+int pic_open_data(const uint8_t *data, size_t data_size)
+{
+	int ret = 0;
+	/******************avformat**************************/
+	AVFormatContext *ifmt_ctx = NULL;
+	struct buffer_data bd = { 0 };
+	uint8_t *avio_ctx_buffer = NULL;
+	AVIOContext *avio_ctx = NULL;
+    size_t avio_ctx_buffer_size = 4096;
+	bd.ptr  = data;
+    bd.size = data_size;
+    if (!(ifmt_ctx = avformat_alloc_context())) {
+        ret = AVERROR(ENOMEM);
+        goto ending1;
+    }
+    avio_ctx_buffer = av_malloc(avio_ctx_buffer_size);
+    if (!avio_ctx_buffer) {
+        ret = AVERROR(ENOMEM);
+        goto ending1;
+    }
+    avio_ctx = avio_alloc_context(avio_ctx_buffer, avio_ctx_buffer_size,
+                                  0, &bd, &read_packet, NULL, NULL);
+    if (!avio_ctx) {
+        ret = AVERROR(ENOMEM);
+        goto ending1;
+    }
+    ifmt_ctx->pb = avio_ctx;
+
+	ret = pic_demux(&ifmt_ctx, NULL);
+	if (ret < 0) {
+		printf("pic_demux error: %s\n", av_err2str(ret));
+		goto ending1;
+	}
+	AVStream *stream = ifmt_ctx->streams[0];
+	if ( AV_PIX_FMT_NONE == stream->codecpar->format) {
+		printf("cannot recognized format: %d\n", stream->codecpar->format);
+		ret = -1;
+		goto ending1;
+	}
+	printf("w:%d, h:%d, pix_fmt:%d, %s\n", stream->codecpar->width, \
+			stream->codecpar->height, stream->codecpar->format,\
+			av_get_pix_fmt_name((enum AVPixelFormat)stream->codecpar->format));
+	printf("demux is %s, codec name is %s\n", ifmt_ctx->iformat->name, avcodec_get_name(stream->codecpar->codec_id));
+	/*************************read_frame*****************************/
+	AVFrame *frame = NULL;
+	AVPacket packet = { .data = NULL, .size = 0 };
+	ret = av_read_frame(ifmt_ctx, &packet);
+	if (ret < 0) {
+		printf("avformat_open_input error: %s\n", av_err2str(ret));
+		goto ending2;
+	}
+	//av_packet_unref(&packet)
+	frame = av_frame_alloc();
+	if (NULL == frame) {
+		printf("av_frame_alloc error\n");
+		ret = -1;
+		goto ending2;
+	}
+	//  av_frame_free(frame);
+	/**************************decode**********************************/
+	AVCodec *dec = NULL;
+	AVCodecContext *codec_ctx = NULL;
+	dec = avcodec_find_decoder(stream->codecpar->codec_id);
+	if (NULL == dec) {
+		printf("can not find decoder for stream %d\n", 0);
+		ret = -1;
+		goto ending3;
+	}
+	codec_ctx = avcodec_alloc_context3(dec);
+	if (NULL == codec_ctx) {
+		printf("avcodec_alloc_context3 error\n");
+		ret = -1;
+		goto ending3;
+	}
+	// avcodec_free_context(&codec_ctx)
+	ret = avcodec_open2(codec_ctx, NULL, NULL);
+	if (ret < 0) {
+		printf("avformat_open_input error: %s\n", av_err2str(ret));
+		goto ending3;
+	}
+	ret = avcodec_send_packet(codec_ctx, &packet);
+	if (ret < 0) {
+		printf("avcodec_send_packet error: %s\n", av_err2str(ret));
+		goto ending3;
+	}
+
+	ret = avcodec_receive_frame(codec_ctx, frame);
+	if (ret < 0) {
+		printf("avcodec_send_packet error: %s\n", av_err2str(ret));
+		goto ending3;
+	}
+	int size = 0;
+	size = av_image_get_buffer_size(frame->format, frame->width, frame->height, 1);
+	printf("size is %d\n", size);
+
+
+	/*********************************sws_scale**********************************/
+	enum AVPixelFormat dst_format = AV_PIX_FMT_NV12;
+	size = av_image_get_buffer_size(dst_format, frame->width, frame->height, 1);
+	printf("pix convert dst size is %d\n", size);
+	uint8_t *buffer = (uint8_t *)malloc(size);
+	if (NULL == buffer) {
+		perror("malloc");
+		ret = -1;
+		goto ending3;
+	}
+	ret = pix_convert(frame, dst_format, buffer, size);
+	if (ret < 0) {
+		ret = -1;
+		goto ending3;
+	}
+
+	/******************write to file************************/
+	//ret = write_raw_data("aa.yuv", buffer, size);
+	/*******************end**************************/
+
+
+ending3:
+	free(buffer);
+	if (NULL != codec_ctx) {
+		avcodec_free_context(&codec_ctx);
+	}
+ending2:
+	if (NULL != frame) {
+		av_frame_free(&frame);
+	}
+ending1:
+	if (NULL != ifmt_ctx) {
+		avformat_close_input(&ifmt_ctx);
+	}
+	/* note: the internal buffer could have changed, and be != avio_ctx_buffer */
+    if (avio_ctx) {
+        av_freep(&avio_ctx->buffer);
+	}
+    avio_context_free(&avio_ctx);
+	return ret<0 ? ret : 0;
+}
+
