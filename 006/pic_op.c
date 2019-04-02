@@ -101,6 +101,7 @@ int pix_convert(AVFrame *frame, enum AVPixelFormat format, uint8_t *buffer, int 
 		av_freep(&sws_dst_data[0]);
 		return ret;
 	}
+	av_freep(&sws_dst_data[0]);
 	return 0;
 }
 
@@ -209,7 +210,7 @@ int pic_open_path(const char *path)
 		goto ending4;
 	}
 	/******************write to file************************/
-	ret = write_raw_data("aa.yuv", buffer, size);
+	//ret = write_raw_data("aa.yuv", buffer, size);
 	/*******************end**************************/
 ending4:
 	free(buffer);
@@ -218,6 +219,7 @@ ending3:
 		avcodec_free_context(&codec_ctx);
 	}
 ending2:
+	av_packet_unref(&packet);
 	if (NULL != frame) {
 		av_frame_free(&frame);
 	}
@@ -334,6 +336,7 @@ int pic_open_data(const uint8_t *data, size_t data_size)
 		ret = -1;
 		goto ending3;
 	}
+
 	ret = pix_convert(frame, dst_format, buffer, size);
 	if (ret < 0) {
 		ret = -1;
@@ -351,6 +354,7 @@ ending3:
 		avcodec_free_context(&codec_ctx);
 	}
 ending2:
+	av_packet_unref(&packet);
 	if (NULL != frame) {
 		av_frame_free(&frame);
 	}
