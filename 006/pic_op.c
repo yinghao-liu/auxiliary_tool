@@ -149,7 +149,7 @@ int pic_open_path(const char *path)
 	ret = av_read_frame(ifmt_ctx, &packet);
 	if (ret < 0) {
 		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		goto ending2;
+		goto ending1;
 	}
 	//av_packet_unref(&packet)
 	frame = av_frame_alloc();
@@ -279,7 +279,7 @@ int pic_open_data(const uint8_t *data, size_t data_size)
 	ret = av_read_frame(ifmt_ctx, &packet);
 	if (ret < 0) {
 		printf("avformat_open_input error: %s\n", av_err2str(ret));
-		goto ending2;
+		goto ending1;
 	}
 	//av_packet_unref(&packet)
 	frame = av_frame_alloc();

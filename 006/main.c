@@ -60,12 +60,14 @@ int main(void)
 	for (a=0; a<100; a++){
 		printf("x is %d, a is %d: %d\n", x, a, FFALIGN(x, a)) ;
 	}*/
+	const char *file_name = "realjpg.jpg";
 	/*******************pic_open_path************************/
-	pic_open_path("realjpg.jpg");
+	pic_open_path(file_name);
 
 	/*******************pic_open_data************************/
-	pic_open_data_wrap("realjpg.jpg");
+	pic_open_data_wrap(file_name);
 
+	return 0;
 	/*******************loop***********************/
 	struct dirent **name_list;
 	const char *database_dir = "database_raw";
