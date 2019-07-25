@@ -22,17 +22,19 @@
 #include "log.h"
 void *thread1(void *nul)
 {
-	for (int i=0; i<1000; i++){
+	for (int i=0; i<1000; i++) {
 		log(log_level_t::ERROR, "--------------------%d\n", i);
 		usleep(2);
 	}
+	return nullptr;
 }
 void *thread2(void *nul)
 {
-	for (int i=0; i<1000; i++){
+	for (int i=0; i<1000; i++) {
 		log(log_level_t::ERROR, "++++++++++++++++++++%d\n", i);
 		usleep(2);
 	}
+	return nullptr;
 }
 int main(void)
 {

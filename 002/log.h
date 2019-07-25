@@ -27,7 +27,7 @@
 #define log(level, s, ...)  \
 	    __log(level, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-enum class log_level_t:uint8_t{
+enum class log_level_t:uint8_t {
 	FATAL = 0,
 	ERROR,
 	WARN,
