@@ -10,11 +10,12 @@ MODULE_DIR=log
 all:x64
 DEBUG?=1
 
-CXXFLAGS:=-std=c++17 -MMD
+CXXFLAGS=-std=c++17 -MMD
 ifeq ($(DEBUG),1)
 CXXFLAGS+=-g
 endif
 LDFLAGS=-Llibs/$(PLATFORM)
+LDFLAGS+=-Wl,-rpath='libs/$(PLATFORM)'
 
 # main.o:CXXFLAGS+=`pkg-config --cflags opencv`
 # LDLIBS=`pkg-config --libs opencv` -l3rdparty
