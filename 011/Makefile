@@ -5,7 +5,7 @@ REVISION = 0
 
 TARGET=main
 INCLUDE_DIR=include
-MODULE_DIR=
+MODULE_DIR=debug
 
 all:x64
 DEBUG?=1

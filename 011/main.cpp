@@ -7,6 +7,8 @@
 #include <sys/epoll.h>
 #include <sys/inotify.h>
 #include <unistd.h>
+#include <signal.h>
+#include "debug/debug.h"
 
 #include <stdlib.h>
 int tail_f(const char *file_name)
@@ -94,27 +96,30 @@ int tail_f(const char *file_name)
 		printf("events is %x\n", ep_evout.events);
 		if (-1 == fds_num) {
 			printf("epoll_wait : %s\n", strerror(errno));
+			// interrupted by a signal handler
+			if (EINTR == errno && g_debug_quit) {
+				break;	
+			}
 		} else if (0 == fds_num) {
 			printf("timeout\n");
 		}
-
 		if (nty_fd != ep_evout.data.fd) {
 			printf("not the right fd : %d\n", ep_evout.data.fd);
 			//return -1;
 		}
-		printf("ep_evout%u\n", ep_evout.events);
+		malloc(1024);
+		printf("ep_evout %#x\n", ep_evout.events);
 		struct inotify_event nty_ev;
 		read_len = read(ep_evout.data.fd, &nty_ev, sizeof (nty_ev));
-		break;
 	}
-	//malloc(1024);
+	printf("end loop\n");
+	malloc(1024);
 	ret = 0;
 ending:
 	if (-1 != fd) {
 		close(fd);
 	}
-	if (-1 != epoll_fd) 
-	{
+	if (-1 != epoll_fd) {
 		close(epoll_fd);
 	}
 	if (nty_fd != -1) {
@@ -125,8 +130,15 @@ ending:
 	}
 	return ret;
 }
+
 int main(void)
 {
+	debug_init();
 	tail_f("log.log");
+	
+	while (!g_debug_quit) {
+		pause();
+	}
+	printf("all clean up\n");
 	return 0;
 }
