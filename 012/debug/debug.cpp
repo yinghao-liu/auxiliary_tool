@@ -18,6 +18,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <signal.h>
+#include "debug.h"
+
 int g_debug_quit = false;
 /**
  * SIGUSR1 for normal return (not exit) process, that can do a memory detecte
