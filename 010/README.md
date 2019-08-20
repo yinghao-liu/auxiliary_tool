@@ -2,6 +2,10 @@
 net interface
 
 ## Description
+`get_sockaddr`  
+get socket address
+`get_ifaddr`  
+get interface addresses (from getifaddrs(3))
 
 ## Note
 `int socket(int domain, int type, int protocol);`  

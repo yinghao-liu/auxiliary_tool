@@ -15,10 +15,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+/** @file */
 #ifndef _NET_INTERFACE_
 #define _NET_INTERFACE_
 
-
+/**
+ * get local ip which connected to peer through local route
+ * @param[in] peer: peer ip address v4 or v6
+ *
+ */
 int get_sockaddr(const char *peer);
 
 #endif
