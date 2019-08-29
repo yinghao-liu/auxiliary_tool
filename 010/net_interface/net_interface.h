@@ -24,6 +24,6 @@
  * @param[in] peer: peer ip address v4 or v6
  *
  */
-int get_sockaddr(const char *peer);
+int get_sockaddr(const char *peer, const char *interface = nullptr);
 
 #endif

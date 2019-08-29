@@ -24,13 +24,15 @@
 #include <sys/types.h>
 #include <ifaddrs.h>
 #include <linux/if_link.h>
+#include <sys/ioctl.h>
+#include <net/if.h>
 #include "net_interface.h"
 
 
 /**
  *	@brief v4&v6
  */
-int get_sockaddr(const char *peer)
+int get_sockaddr(const char *peer, const char *interface)
 {
 	int sock_fd = -1;
     socklen_t sockaddr_len = 0;
@@ -44,6 +46,10 @@ int get_sockaddr(const char *peer)
 		sockaddr->sin6_family = AF_INET6;
 		sockaddr->sin6_port = htons(0);
 		sockaddr->sin6_scope_id = 0;
+		if (nullptr != interface) {
+			sockaddr->sin6_scope_id = if_nametoindex("ens37");
+			fprintf(stdout, "%u\n", sockaddr->sin6_scope_id);
+		}
 		if (1 != inet_pton(sockaddr->sin6_family, peer, &sockaddr->sin6_addr)) {
 			fprintf(stderr, "inet_pton: %s\n", strerror(errno));
 		}
@@ -73,6 +79,15 @@ int get_sockaddr(const char *peer)
 		perror("socket");
 		return -1;
 	}
+
+	/*struct ifreq ifr;
+	memset(&ifr, 0x00, sizeof(ifr));
+	strncpy(ifr.ifr_name, "ens37", strlen("ens37"));*/
+	//setsockopt(sock_fd, SOL_SOCKET, SO_BINDTODEVICE, (char *)&ifr, sizeof(ifr));
+
+	/*if (0 != ioctl(sock_fd, SIOCGIFINDEX, &ifr)) {
+		perror("ioctl:");	
+	}*/
 
     sockaddr_len = sizeof (peer_addr);
 	if (0 != connect(sock_fd, (const struct sockaddr*)&peer_addr, sockaddr_len)) {

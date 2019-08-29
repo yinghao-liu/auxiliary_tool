@@ -22,3 +22,4 @@ then you can get the number by `getprotobyname`, but be careful, it is not threa
 2. man 2 getpeername
 3. man 2 recvfrom
 4. man 3 getifaddrs
+5. /etc/iproute2/rt_scopes
