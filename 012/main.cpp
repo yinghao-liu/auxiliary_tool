@@ -43,11 +43,16 @@ int router_solicitation(const char *interface)
 	return 0;
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	debug_init();
 	
-	router_solicitation("ens37");
+	if (argc < 2) {
+		printf("./main interface\n");
+		return 0;
+	}
+	printf("%s\n", argv[1]);
+	router_solicitation(argv[1]);
 	g_debug_quit = true;
 	while (!g_debug_quit) {
 		pause();
