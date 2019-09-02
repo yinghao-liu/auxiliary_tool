@@ -22,6 +22,10 @@
 /**
  * get local ip which connected to peer through local route
  * @param[in] peer: peer ip address v4 or v6
+ * @param[in] interface: local net interface, eg. "eth0", null is default
+ * @note when ipv6 link address(fe80::/64) is used, interface must be specified 
+ *
+ *
  *
  */
 int get_sockaddr(const char *peer, const char *interface = nullptr);

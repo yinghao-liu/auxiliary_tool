@@ -47,7 +47,7 @@ int get_sockaddr(const char *peer, const char *interface)
 		sockaddr->sin6_port = htons(0);
 		sockaddr->sin6_scope_id = 0;
 		if (nullptr != interface) {
-			sockaddr->sin6_scope_id = if_nametoindex("ens37");
+			sockaddr->sin6_scope_id = if_nametoindex(interface);
 			fprintf(stdout, "%u\n", sockaddr->sin6_scope_id);
 		}
 		if (1 != inet_pton(sockaddr->sin6_family, peer, &sockaddr->sin6_addr)) {
@@ -82,10 +82,9 @@ int get_sockaddr(const char *peer, const char *interface)
 
 	/*struct ifreq ifr;
 	memset(&ifr, 0x00, sizeof(ifr));
-	strncpy(ifr.ifr_name, "ens37", strlen("ens37"));*/
-	//setsockopt(sock_fd, SOL_SOCKET, SO_BINDTODEVICE, (char *)&ifr, sizeof(ifr));
-
-	/*if (0 != ioctl(sock_fd, SIOCGIFINDEX, &ifr)) {
+	strncpy(ifr.ifr_name, interface, strlen(interface));
+	setsockopt(sock_fd, SOL_SOCKET, SO_BINDTODEVICE, (char *)&ifr, sizeof(ifr));
+	if (0 != ioctl(sock_fd, SIOCGIFINDEX, &ifr)) {
 		perror("ioctl:");	
 	}*/
 
