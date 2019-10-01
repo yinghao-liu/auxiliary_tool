@@ -107,8 +107,9 @@ int get_sockaddr(const char *peer, const char *interface)
 
 int get_ifaddr(void)
 {
+	int ret;
 	struct ifaddrs *ifaddr, *ifa;
-	int family, s;
+	int family;
 	char host[NI_MAXHOST];
 
 	if (-1 == getifaddrs(&ifaddr)) {
@@ -120,46 +121,42 @@ int get_ifaddr(void)
 		if (NULL == ifa->ifa_addr) {
 			continue;
 		}
-
 		family = ifa->ifa_addr->sa_family;
-
-
 		printf("%-8s %s (%d)\n",
 				ifa->ifa_name,
 				(family == AF_PACKET) ? "AF_PACKET" :
 				(family == AF_INET) ? "AF_INET" :
 				(family == AF_INET6) ? "AF_INET6" : "???",
 				family);
-
+/************************************clumsy way to get ip string*****************************************/
 		if (AF_INET == family || AF_INET6 == family) {
-			char ipadd[64] = {};
+			char ipaddr[64] = {};
 			if (AF_INET == family) {
 				struct sockaddr_in *sockaddr;
-				sockaddr = (struct sockaddr_in *)&ifa->ifa_netmask;
-				if (NULL == inet_ntop(family, &sockaddr->sin_addr, ipadd, sizeof (*sockaddr))) {
+				sockaddr = (struct sockaddr_in *)ifa->ifa_addr;
+				if (NULL == inet_ntop(family, &sockaddr->sin_addr, ipaddr, sizeof (ipaddr))) {
 					fprintf(stderr, "inet_ntop: %s\n", strerror(errno));
 				}
 			} else {
 				struct sockaddr_in6 *sockaddr;
-				sockaddr = (struct sockaddr_in6 *)&ifa->ifa_netmask;
-				if (NULL == inet_ntop(family, &sockaddr->sin6_addr, ipadd, sizeof (*sockaddr))) {
+				sockaddr = (struct sockaddr_in6 *)ifa->ifa_addr;
+				if (NULL == inet_ntop(family, &sockaddr->sin6_addr, ipaddr, sizeof (ipaddr))) {
 					fprintf(stderr, "inet_ntop: %s\n", strerror(errno));
 				}
 			}
-			printf("%s\n", ipadd);
+			printf("ipaddr:%s\n", ipaddr);
 
-
-			s = getnameinfo(ifa->ifa_addr,
-					(family == AF_INET) ? sizeof(struct sockaddr_in) :
-					sizeof(struct sockaddr_in6),
-					host, NI_MAXHOST,
-					NULL, 0, NI_NUMERICHOST);
-			if (s != 0) {
-				printf("getnameinfo() failed: %s\n", gai_strerror(s));
+/*************************************elegant way to get ip string****************************************/
+			//if family is AF_INET6, and ip is link ip, this means can get a string that ip bind eth interface
+			//eg fe80::20c:29ff:1122:2233%ens33
+			ret = getnameinfo(ifa->ifa_addr,
+					(family == AF_INET) ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+					host, NI_MAXHOST, NULL, 0, NI_NUMERICHOST);
+			if (ret != 0) {
+				printf("getnameinfo() failed: %s\n", gai_strerror(ret));
 				freeifaddrs(ifaddr);
 				return -1;
 			}
-
 			printf("\t\taddress: <%s>\n", host);
 
 		} else if (family == AF_PACKET && ifa->ifa_data != NULL) {
@@ -175,12 +172,31 @@ int get_ifaddr(void)
 	return 0;
 }
 
+int name_info(struct sockaddr *addr)
+{
+	int ret = -1;
+	socklen_t addrlen;
+	if (AF_INET == addr->sa_family) {
+		addrlen = sizeof (sockaddr_in);
+	} else if (AF_INET6) {
+		addrlen = sizeof (sockaddr_in6);
+	} else {
+		printf("ai_family not supported\n");
+	}
+	char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
+	ret = getnameinfo(addr, addrlen, hbuf, sizeof(hbuf), sbuf, sizeof(sbuf), NI_NUMERICHOST | NI_NUMERICSERV);
+	if (ret == 0) {
+		printf("----host=%s, serv=%s\n", hbuf, sbuf);
+	} else {
+		printf("%s\n", gai_strerror(ret));
+	}
+	return 0;
+}
+
+
 int addrinfo(void)
 {
 	int ret = -1;
-//int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,           struct addrinfo **res);
-//void freeaddrinfo(struct addrinfo *res);
-//const char *gai_strerror(int errcode);
 	struct addrinfo *result = nullptr;
 	struct addrinfo *next = nullptr;
 	ret = getaddrinfo("baidu.com", nullptr, nullptr, &result);
@@ -192,10 +208,11 @@ int addrinfo(void)
 		printf("ai_family: %d\n", next->ai_family);
 		printf("ai_canonname: %s\n", next->ai_canonname);
 		printf("ai_canonname: %s\n", inet_ntoa(((sockaddr_in *)next->ai_addr)->sin_addr));
+		name_info(next->ai_addr);
 		next = next->ai_next;
 	}
 	freeaddrinfo(result);
 
-//	getnameinfo(); // reverse
 	return 0;
 }
+

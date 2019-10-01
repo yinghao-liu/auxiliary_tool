@@ -17,9 +17,13 @@ search in file `netinet/in.h`, they are all prefixed by 'IPPROTO_'
 all the protocols are listed in `/etc/protocols`, see also protocols(5).  
 then you can get the number by `getprotobyname`, but be careful, it is not thread safe.
 
+others are examples in man
+
 ## reference
 1. man 2 getsockname
 2. man 2 getpeername
 3. man 2 recvfrom
 4. man 3 getifaddrs
 5. /etc/iproute2/rt_scopes
+6. man 3 getnameinfo
+7. man 3 getaddrinfo
