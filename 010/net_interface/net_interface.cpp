@@ -116,7 +116,6 @@ int get_ifaddr(void)
 		return -1;
 	}
 
-
 	for (ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next) {
 		if (NULL == ifa->ifa_addr) {
 			continue;
@@ -132,7 +131,24 @@ int get_ifaddr(void)
 				(family == AF_INET6) ? "AF_INET6" : "???",
 				family);
 
-		if (family == AF_INET || family == AF_INET6) {
+		if (AF_INET == family || AF_INET6 == family) {
+			char ipadd[64] = {};
+			if (AF_INET == family) {
+				struct sockaddr_in *sockaddr;
+				sockaddr = (struct sockaddr_in *)&ifa->ifa_netmask;
+				if (NULL == inet_ntop(family, &sockaddr->sin_addr, ipadd, sizeof (*sockaddr))) {
+					fprintf(stderr, "inet_ntop: %s\n", strerror(errno));
+				}
+			} else {
+				struct sockaddr_in6 *sockaddr;
+				sockaddr = (struct sockaddr_in6 *)&ifa->ifa_netmask;
+				if (NULL == inet_ntop(family, &sockaddr->sin6_addr, ipadd, sizeof (*sockaddr))) {
+					fprintf(stderr, "inet_ntop: %s\n", strerror(errno));
+				}
+			}
+			printf("%s\n", ipadd);
+
+
 			s = getnameinfo(ifa->ifa_addr,
 					(family == AF_INET) ? sizeof(struct sockaddr_in) :
 					sizeof(struct sockaddr_in6),
@@ -140,6 +156,7 @@ int get_ifaddr(void)
 					NULL, 0, NI_NUMERICHOST);
 			if (s != 0) {
 				printf("getnameinfo() failed: %s\n", gai_strerror(s));
+				freeifaddrs(ifaddr);
 				return -1;
 			}
 
@@ -158,3 +175,27 @@ int get_ifaddr(void)
 	return 0;
 }
 
+int addrinfo(void)
+{
+	int ret = -1;
+//int getaddrinfo(const char *node, const char *service, const struct addrinfo *hints,           struct addrinfo **res);
+//void freeaddrinfo(struct addrinfo *res);
+//const char *gai_strerror(int errcode);
+	struct addrinfo *result = nullptr;
+	struct addrinfo *next = nullptr;
+	ret = getaddrinfo("baidu.com", nullptr, nullptr, &result);
+	if (0 != ret) {
+		printf("%s\n", gai_strerror(ret));	
+	}
+	next = result;
+	while (nullptr != next) {
+		printf("ai_family: %d\n", next->ai_family);
+		printf("ai_canonname: %s\n", next->ai_canonname);
+		printf("ai_canonname: %s\n", inet_ntoa(((sockaddr_in *)next->ai_addr)->sin_addr));
+		next = next->ai_next;
+	}
+	freeaddrinfo(result);
+
+//	getnameinfo(); // reverse
+	return 0;
+}

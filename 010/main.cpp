@@ -7,9 +7,10 @@ int main(void)
 	debug_init();
 
 	//get_sockaddr("fe80::20c:29ff:fee7:2186", "ens37");
-	get_sockaddr("fe80::20c:29ff:ee7:2186");
-	get_sockaddr("2001::2321", "ens37");
+	//get_sockaddr("fe80::20c:29ff:ee7:2186");
+	//get_sockaddr("2001::2321", "ens37");
 	//get_ifaddr();
+	addrinfo();
 	g_debug_quit = true;
 	while (!g_debug_quit) {
 		pause();

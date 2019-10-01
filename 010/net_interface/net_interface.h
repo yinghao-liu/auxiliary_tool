@@ -29,5 +29,6 @@
  *
  */
 int get_sockaddr(const char *peer, const char *interface = nullptr);
+int addrinfo(void);
 
 #endif
