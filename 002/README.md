@@ -14,10 +14,10 @@ log system which is thread-safe
 
 ### 初始化
 ```cpp
-int log_init(level_t log_level=FATAL, const char *log_file=NULL, uint16_t max_mb=10);
+int log_init(log_level_t log_level=DEFAULT_LOG_LEVEL, const char *log_file=NULL, uint16_t max_mb=10);
 ```
 1. 可不初始化，此情况与`log_init()`等效。`log_file=NULL`则将日志打印至终端
-2. `log_level`指定打印等级，有FATAL、ERROR、WARN、INFO、DEBUG五级，详细程度依次递增
+2. `log_level`指定打印等级，有FATAL、ERROR、WARNING、INFO、DEBUG五级，详细程度依次递增
 3. `max_mb`指定最大文件大小，单位：MB
 
 ### 日志打印

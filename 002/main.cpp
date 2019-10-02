@@ -38,6 +38,12 @@ void *thread2(void *nul)
 }
 int main(void)
 {
+	/*
+	const char *p = "--%s\n";
+	printf(p, "printf message");
+	//log(log_level_t::ERROR, p, "log message"); // compile error
+	log(log_level_t::ERROR, "++++++++++++++++++++%s\n", "ddd");
+	*/
 	log_init(log_level_t::INFO, "main.log", 2);
 	pthread_t p1;
 	pthread_t p2;

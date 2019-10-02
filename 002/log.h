@@ -20,24 +20,39 @@
 #include <stdio.h>
 #include <stdint.h>
 
+enum class log_level_t:uint8_t {
+	FATAL = 0,
+	ERROR,
+	WARNING,
+	INFO,
+	DEBUG
+};
 /*
- * the second argument must be the const string like "aabbcc%s", can't be a char* pointer
+ * the second argument s must be the const string like "aabbcc%s", can't be a char* pointer
  * there is another way to resolve that, but you should malloc memory.
  */
 #define log(level, s, ...)  \
 	    __log(level, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-enum class log_level_t:uint8_t {
-	FATAL = 0,
-	ERROR,
-	WARN,
-	INFO,
-	DEBUG
-};
+#define logfatal(s, ...)  \
+	    __log(log_level_t::FATAL, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
 
-constexpr log_level_t DEFAULT_LOG_LEVEL = log_level_t::FATAL;
+#define logerror(s, ...)  \
+	    __log(log_level_t::ERROR, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+#define logwarning(s, ...)  \
+	    __log(log_level_t::WARNING, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+#define loginfo(s, ...)  \
+	    __log(log_level_t::INFO, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+#define logdebug(s, ...)  \
+	    __log(log_level_t::DEBUG, "%s:%u(%s): " s, __FILE__, __LINE__, __FUNCTION__, ##__VA_ARGS__)
+
+constexpr log_level_t DEFAULT_LOG_LEVEL = log_level_t::ERROR;
 
 int log_init(log_level_t log_level=DEFAULT_LOG_LEVEL, const char *log_file=NULL, uint16_t max_mb=10);
+
 
 /*don't use this function directly, use macro log instead*/
 void __log(log_level_t level, const char *s, ...);

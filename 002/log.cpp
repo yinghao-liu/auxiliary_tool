@@ -121,7 +121,7 @@ ending:
 
 void __log(log_level_t level, const char *s, ...)
 {
-	if ((level>g_log_level)) {
+	if (level > g_log_level) {
 		return;
 	}
 	time_t now_t;
