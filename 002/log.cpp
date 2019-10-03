@@ -29,10 +29,11 @@
 using std::string;
 
 static string g_log_file;
-static log_level_t g_log_level=DEFAULT_LOG_LEVEL;
-static FILE *g_log_fd=NULL;
-static int g_max_mb=10;
-static const char *g_map[]={"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};
+static log_level_t g_log_level = DEFAULT_LOG_LEVEL;
+static FILE *g_log_fd = NULL;
+// default maximum file size(MB)
+static int g_max_mb = 10;
+static const char *g_map[] = {"FATAL", "ERROR", "WARN", "INFO", "DEBUG"};
 static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 
 //int log_init(level_t log_level=FATAL, const char *log_file=NULL, uint16_t max_mb=10);
@@ -127,6 +128,7 @@ void __log(log_level_t level, const char *s, ...)
 	time_t now_t;
 	struct tm now_m;
 	char str[32]= {0};// 32 is enough for string like "03-14 14:02:40 [FATAL] "
+	static int check_tick = 0;
 	now_t = time(NULL);
 	localtime_r(&now_t, &now_m);
 	strftime(str, sizeof (str) - 1, "%m-%d %H:%M:%S ", &now_m);
@@ -138,7 +140,11 @@ void __log(log_level_t level, const char *s, ...)
 	if (NULL != g_log_fd) {
 		fprintf(g_log_fd, "%s", str);
 		vfprintf(g_log_fd, s, ap);
-		check_file_size();
+		if (check_tick > 1024) {
+			check_file_size();
+			check_tick = 0;
+		}
+		check_tick++;
 	} else {
 		printf("%s", str);
 		vprintf(s, ap);

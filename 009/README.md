@@ -6,11 +6,14 @@ refer to python logging
 offers several categories of components: loggers, handlers, filters, and formatters.  
 * Loggers expose the interface that application code directly uses.
 * Handlers send the log records (created by loggers) to the appropriate destination.
-* Filters provide a finer grained facility for determining which log records to output.
+* ~~Filters provide a finer grained facility for determining which log records to output.(see Note below)~~
 * ~~Formatters specify the layout of log records in the final output.(not necessary here, we don't need change the format)~~
 
+## Note
+why Filters can't
+log use variable argument lists in c, we can pass va_list to some function like `vprintf()` easily and efficiently, but Filters can't.
 
-## reference
+## Reference
 1. [event-loop](http://www.ruanyifeng.com/blog/2014/10/event-loop.html)
 2. [libuv](http://luohaha.github.io/Chinese-uvbook/source/introduction.html)
 3. [libuv doc](http://docs.libuv.org/en/v1.x/index.html)
