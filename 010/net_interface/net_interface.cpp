@@ -194,7 +194,7 @@ int name_info(struct sockaddr *addr)
 }
 
 
-int addrinfo(void)
+int addrinfo(const char *domain)
 {
 	int ret = -1;
 	struct addrinfo *result = nullptr;
@@ -216,3 +216,26 @@ int addrinfo(void)
 	return 0;
 }
 
+
+/*
+ * POSIX.1-2008 removes the specifications of gethostbyname(), gethostbyaddr(), and h_errno, 
+ * recommending the use of getaddrinfo(3) and getnameinfo(3) instead
+ */
+int addrinfo_obsolete(const char *domain)
+{
+	struct hostent *host = NULL;
+	host = gethostbyname(domain);
+	if (!host) {
+		printf("Get IP address error! %s\n", hstrerror(h_errno));
+		return -1;
+	}
+	printf("host name:%s\n", host->h_name);
+	for (int i=0; host->h_aliases[i]; i++) {
+		printf("Aliases %d: %s\n", i, host->h_aliases[i]);
+	}
+	printf("Address type: %s\n", (host->h_addrtype==AF_INET) ? "AF_INET": "AF_INET6");
+	for (int i=0; host->h_addr_list[i]; i++) {
+		printf("IP addr %d: %s\n", i, inet_ntoa(*(struct in_addr*)host->h_addr_list[i]));
+	}
+	return 0;
+}

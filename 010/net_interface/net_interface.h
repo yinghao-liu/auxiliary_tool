@@ -29,6 +29,8 @@
  *
  */
 int get_sockaddr(const char *peer, const char *interface = nullptr);
-int addrinfo(void);
+int get_ifaddr(void);
+int addrinfo(const char *domain);
+int addrinfo_obsolete(const char *domain);
 
 #endif
