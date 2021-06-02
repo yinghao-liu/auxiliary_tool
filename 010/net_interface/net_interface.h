@@ -23,14 +23,22 @@
  * get local ip which connected to peer through local route
  * @param[in] peer: peer ip address v4 or v6
  * @param[in] interface: local net interface, eg. "eth0", null is default
- * @note when ipv6 link address(fe80::/64) is used, interface must be specified 
- *
- *
- *
+ * @note when ipv6 link address(fe80::/64) is used, interface must be specified
  */
 int get_sockaddr(const char *peer, const char *interface = nullptr);
+/**
+ * get interface addr and print
+ */
 int get_ifaddr(void);
+/**
+ * get addr info through domain like baidu.com, using getaddrinfo inside
+ * @param[in] domain: hostname
+ */
 int addrinfo(const char *domain);
+/**
+ * get addr info through domain like baidu.com, using getostbyname inside which is deprecated
+ * @param[in] domain: hostname
+ */
 int addrinfo_obsolete(const char *domain);
 
 #endif

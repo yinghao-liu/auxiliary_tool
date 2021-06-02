@@ -172,6 +172,25 @@ int get_ifaddr(void)
 	return 0;
 }
 
+/**
+ * get index and name of all interface
+ */
+int if_nameindex_demo(void)
+{
+	struct if_nameindex *index = NULL;
+	struct if_nameindex *index_tmp = NULL;
+	index = if_nameindex();
+	if (NULL == index) {
+		fprintf(stderr, "if_nameindex err:%s\n", strerror(errno));
+		return -1;
+	}
+	for (index_tmp = index; ((NULL != index_tmp->if_name) || (0 != index_tmp->if_index)); index_tmp++) {
+		printf("if_index:%d, if_name:%s\n", index_tmp->if_index, index_tmp->if_name);
+	}   
+	if_freenameindex(index);
+}
+
+
 int name_info(struct sockaddr *addr)
 {
 	int ret = -1;

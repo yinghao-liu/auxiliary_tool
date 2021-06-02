@@ -3,9 +3,17 @@ net interface
 
 ## Description
 `get_sockaddr`  
-get socket address
+get socket address, use `getsockname` mainly, It returns  the  current address to which the socket sockfd is bound.
+
 `get_ifaddr`  
-get interface addresses (from getifaddrs(3))
+get interface addresses (from getifaddrs(3)), use `getnameinfo` for converts a socket 
+address to a corresponding host and service.
+
+`getaddrinfo`
+do what likes DNS do, network address and service translation
+
+`if_nameindex`
+get index and name of all interface
 
 ## Note
 `int socket(int domain, int type, int protocol);`  
@@ -27,3 +35,4 @@ others are examples in man
 5. /etc/iproute2/rt_scopes
 6. man 3 getnameinfo
 7. man 3 getaddrinfo
+8. man 3 if_nameindex *get network interface names and indexes*
