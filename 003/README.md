@@ -63,4 +63,5 @@ set a mime part's name
 `CURLcode curl_mime_data(curl_mimepart * part, const char * data , size_t datasize);`  
 set a mime part's body data from memory
 
-
+## reference
+- [The libcurl API](https://curl.se/libcurl/c/)
