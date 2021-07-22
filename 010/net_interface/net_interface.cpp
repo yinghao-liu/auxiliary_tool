@@ -188,6 +188,7 @@ int if_nameindex_demo(void)
 		printf("if_index:%d, if_name:%s\n", index_tmp->if_index, index_tmp->if_name);
 	}   
 	if_freenameindex(index);
+	return 0;
 }
 
 
@@ -218,7 +219,7 @@ int addrinfo(const char *domain)
 	int ret = -1;
 	struct addrinfo *result = nullptr;
 	struct addrinfo *next = nullptr;
-	ret = getaddrinfo("baidu.com", nullptr, nullptr, &result);
+	ret = getaddrinfo(domain, nullptr, nullptr, &result);
 	if (0 != ret) {
 		printf("%s\n", gai_strerror(ret));	
 	}
@@ -226,7 +227,7 @@ int addrinfo(const char *domain)
 	while (nullptr != next) {
 		printf("ai_family: %d\n", next->ai_family);
 		printf("ai_canonname: %s\n", next->ai_canonname);
-		printf("ai_canonname: %s\n", inet_ntoa(((sockaddr_in *)next->ai_addr)->sin_addr));
+		printf("ai_ai_addr: %s\n", inet_ntoa(((sockaddr_in *)next->ai_addr)->sin_addr));
 		name_info(next->ai_addr);
 		next = next->ai_next;
 	}
