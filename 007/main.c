@@ -58,12 +58,35 @@ int split(const char *str, const char *delim, const char *subdelim)
 	return 0;
 }
 
+int split_with_empty(const char *str, const char *delim)
+{
+	size_t str_len = strlen(str);
+	char *str_shd = (char *)malloc(str_len);
+	if (NULL == str_shd) {
+		perror("malloc");
+		return -1;
+	}
+	memcpy(str_shd, str, str_len);
+
+	char *token = NULL;
+	while (NULL != str_shd){
+		token = strsep(&str_shd, delim);
+		printf("after token:%p, [%s]\n", token, token);
+		printf("after str_shd:%p, [%s]\n", str_shd, str_shd);
+		printf("----------------\n");
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	char aa[] = "1-90,22-3,77";
-	split(aa, ",", "-");
-	split(NULL, ",", NULL);
-	printf("%s\n", aa);
+	//char aa[] = "1-90,22-3,77";
+	char aa[] = ";try;;;;0;0;0;0;";
+	printf("before %s\n", aa);
+	//split(aa, ";", NULL);
+	//split(NULL, ",", NULL);
+	split_with_empty(aa, ";");
+	printf("after %s\n", aa);
+
 	return 0;
 }
 
